@@ -57,7 +57,11 @@ export default function Navbar() {
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                             >
                                 <div className="user-avatar">
-                                    {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                                    {user?.avatar ? (
+                                        <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                    ) : (
+                                        user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'
+                                    )}
                                 </div>
                                 <span className="user-name desktop-only">
                                     {user?.fullName || user?.username}
