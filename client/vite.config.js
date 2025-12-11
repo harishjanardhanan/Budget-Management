@@ -55,6 +55,9 @@ export default defineConfig({
                         }
                     }
                 ]
+            },
+            define: {
+                'import.meta.env.VITE_API_URL': JSON.stringify('http://68.233.107.62:3001/api')
             }
         })
     ],

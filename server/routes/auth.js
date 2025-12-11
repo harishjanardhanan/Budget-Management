@@ -127,4 +127,108 @@ router.post('/login',
     }
 );
 
+// Update user profile
+router.put('/profile',
+    body('fullName').optional().trim().isLength({ max: 100 }),
+    body('email').optional().isEmail().normalizeEmail(),
+    body('phone').optional().trim().isLength({ max: 20 }),
+    body('bio').optional().trim().isLength({ max: 500 }),
+    body('avatar').optional().trim(),
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        // Get user ID from JWT token
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const userId = decoded.userId;
+
+            const { fullName, email, phone, bio, avatar } = req.body;
+
+            // Build update query dynamically
+            const fields = [];
+            const values = [];
+            let paramIndex = 1;
+
+            if (fullName !== undefined) {
+                fields.push(`full_name = $${paramIndex}`);
+                values.push(fullName);
+                paramIndex++;
+            }
+
+            if (email !== undefined) {
+                // Check if email is already taken by another user
+                const emailCheck = await pool.query(
+                    'SELECT id FROM users WHERE email = $1 AND id != $2',
+                    [email, userId]
+                );
+                if (emailCheck.rows.length > 0) {
+                    return res.status(409).json({ error: 'Email already in use' });
+                }
+                fields.push(`email = $${paramIndex}`);
+                values.push(email);
+                paramIndex++;
+            }
+
+            if (phone !== undefined) {
+                fields.push(`phone = $${paramIndex}`);
+                values.push(phone);
+                paramIndex++;
+            }
+
+            if (bio !== undefined) {
+                fields.push(`bio = $${paramIndex}`);
+                values.push(bio);
+                paramIndex++;
+            }
+
+            if (avatar !== undefined) {
+                fields.push(`avatar = $${paramIndex}`);
+                values.push(avatar);
+                paramIndex++;
+            }
+
+            if (fields.length === 0) {
+                return res.status(400).json({ error: 'No fields to update' });
+            }
+
+            fields.push(`updated_at = CURRENT_TIMESTAMP`);
+            values.push(userId);
+
+            const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramIndex} RETURNING id, username, email, full_name, phone, bio, avatar, created_at, updated_at`;
+
+            const result = await pool.query(query, values);
+            const user = result.rows[0];
+
+            res.json({
+                message: 'Profile updated successfully',
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email,
+                    fullName: user.full_name,
+                    phone: user.phone,
+                    bio: user.bio,
+                    avatar: user.avatar,
+                    createdAt: user.created_at,
+                    updatedAt: user.updated_at
+                }
+            });
+        } catch (error) {
+            console.error('Profile update error:', error);
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(401).json({ error: 'Invalid token' });
+            }
+            res.status(500).json({ error: 'Failed to update profile' });
+        }
+    }
+);
+
 export default router;

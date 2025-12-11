@@ -41,6 +41,16 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
 
+// Serve static files in production (Docker deployment)
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('public'));
+
+    // Catch-all route to serve index.html for client-side routing
+    app.get('*', (req, res) => {
+        res.sendFile('index.html', { root: 'public' });
+    });
+}
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });

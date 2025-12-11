@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Navbar() {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     const navItems = [
         { path: '/', label: '📊 Dashboard' },
@@ -13,35 +16,100 @@ export default function Navbar() {
         { path: '/reports', label: '📈 Reports' },
     ];
 
+    const closeMobileMenu = () => setMobileMenuOpen(false);
+
     return (
-        <nav className="glass-card" style={{ margin: '1rem', padding: '1rem', position: 'sticky', top: '1rem', zIndex: 100 }}>
-            <div className="container">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-lg">
-                        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>💰</h2>
-                        <div className="flex gap-sm" style={{ flexWrap: 'wrap' }}>
+        <>
+            <nav className="glass-card navbar-container">
+                <div className="container">
+                    <div className="navbar-content">
+                        {/* Logo and Hamburger */}
+                        <div className="navbar-left">
+                            <h2 className="navbar-logo">💰 Budget Manager</h2>
+                            <button
+                                className="hamburger-btn"
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                <span className="hamburger-icon">
+                                    {mobileMenuOpen ? '✕' : '☰'}
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Desktop Navigation */}
+                        <div className="navbar-links desktop-only">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`btn ${location.pathname === item.path ? 'btn-primary' : 'btn-ghost'}`}
-                                    style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                    className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* User Menu */}
+                        <div className="user-menu-container">
+                            <button
+                                className="user-menu-btn"
+                                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                            >
+                                <div className="user-avatar">
+                                    {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                                </div>
+                                <span className="user-name desktop-only">
+                                    {user?.fullName || user?.username}
+                                </span>
+                                <span className="dropdown-arrow">▼</span>
+                            </button>
+
+                            {userMenuOpen && (
+                                <>
+                                    <div className="dropdown-overlay" onClick={() => setUserMenuOpen(false)} />
+                                    <div className="user-dropdown">
+                                        <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                                            <span>👤</span> Profile
+                                        </Link>
+                                        <Link to="/settings" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                                            <span>⚙️</span> Settings
+                                        </Link>
+                                        <button onClick={logout} className="dropdown-item logout-btn">
+                                            <span>🚪</span> Logout
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Mobile Menu Overlay */}
+            {mobileMenuOpen && (
+                <>
+                    <div className="mobile-menu-overlay" onClick={closeMobileMenu} />
+                    <div className="mobile-menu">
+                        <div className="mobile-menu-header">
+                            <h3>Menu</h3>
+                            <button onClick={closeMobileMenu} className="close-btn">✕</button>
+                        </div>
+                        <div className="mobile-menu-items">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={`mobile-menu-item ${location.pathname === item.path ? 'active' : ''}`}
+                                    onClick={closeMobileMenu}
                                 >
                                     {item.label}
                                 </Link>
                             ))}
                         </div>
                     </div>
-                    <div className="flex items-center gap-md">
-                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                            {user?.fullName || user?.username}
-                        </span>
-                        <button onClick={logout} className="btn btn-ghost" style={{ padding: '0.5rem 1rem' }}>
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </nav>
+                </>
+            )}
+        </>
     );
 }

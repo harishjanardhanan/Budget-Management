@@ -1,0 +1,9 @@
+{
+  "appId": "com.harish.budgetmanager",
+  "appName": "Budget Manager",
+  "webDir": "dist",
+  "server": {
+    "url": "http://68.233.107.62:3001",
+    "cleartext": true
+  }
+}

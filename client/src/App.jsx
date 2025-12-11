@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
@@ -7,7 +8,10 @@ import Categories from './pages/Categories';
 import Budgets from './pages/Budgets';
 import Recurring from './pages/Recurring';
 import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import './index.css';
 
 function ProtectedRoute({ children }) {
@@ -80,7 +84,24 @@ function AppRoutes() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/settings"
+                    element={
+                        <ProtectedRoute>
+                            <Settings />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
+            <Footer />
         </>
     );
 }
@@ -88,9 +109,11 @@ function AppRoutes() {
 function App() {
     return (
         <BrowserRouter>
-            <AuthProvider>
-                <AppRoutes />
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AppRoutes />
+                </AuthProvider>
+            </ThemeProvider>
         </BrowserRouter>
     );
 }

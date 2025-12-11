@@ -1,20 +1,22 @@
 # Multi-stage build for production
 
 # Stage 1: Build frontend
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm ci --only=production
+RUN npm install
 COPY client/ ./
+# Set API URL for production build - use relative path so it works with any domain/IP
+ENV VITE_API_URL=/api
 RUN npm run build
 
 # Stage 2: Backend
-FROM node:18-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # Install dependencies
 COPY server/package*.json ./
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Copy backend code
 COPY server/ ./
