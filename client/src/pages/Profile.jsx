@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
@@ -14,17 +14,37 @@ export default function Profile() {
         avatar: user?.avatar || ''
     });
 
+    // Update form data when user changes
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                fullName: user.fullName || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                bio: user.bio || '',
+                avatar: user.avatar || ''
+            });
+        }
+    }, [user]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             const response = await api.put('/auth/profile', formData);
-            updateUser(response.data.user);
-            setEditing(false);
-            alert('Profile updated successfully!');
+            console.log('Profile update response:', response);
+
+            // Update user in context and localStorage
+            if (response.user) {
+                updateUser(response.user);
+                setEditing(false);
+                alert('Profile updated successfully!');
+            } else {
+                throw new Error('Invalid response format');
+            }
         } catch (error) {
             console.error('Error updating profile:', error);
-            alert('Failed to update profile');
+            alert(`Failed to update profile: ${error.message}`);
         } finally {
             setLoading(false);
         }

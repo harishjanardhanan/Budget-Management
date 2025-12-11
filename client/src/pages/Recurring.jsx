@@ -27,10 +27,13 @@ export default function Recurring() {
                 api.get('/recurring'),
                 api.get('/categories')
             ]);
-            setRecurring(recurringRes.data.recurringTransactions || []);
-            setCategories(categoriesRes.data.categories || []);
+            console.log('Recurring response:', recurringRes);
+            console.log('Categories response:', categoriesRes);
+            setRecurring(recurringRes.data?.recurringTransactions || recurringRes.recurringTransactions || []);
+            setCategories(categoriesRes.data?.categories || categoriesRes.categories || []);
         } catch (error) {
             console.error('Error fetching data:', error);
+            alert('Failed to load data. Please refresh the page.');
         } finally {
             setLoading(false);
         }
@@ -38,6 +41,7 @@ export default function Recurring() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Submitting recurring transaction:', formData);
         try {
             if (editingId) {
                 await api.put(`/recurring/${editingId}`, formData);
@@ -49,7 +53,7 @@ export default function Recurring() {
             fetchData();
         } catch (error) {
             console.error('Error saving recurring transaction:', error);
-            alert('Failed to save recurring transaction');
+            alert(`Failed to save recurring transaction: ${error.message}`);
         }
     };
 
