@@ -25,7 +25,6 @@ export default function Navbar() {
                     <div className="navbar-content">
                         {/* Logo and Hamburger */}
                         <div className="navbar-left">
-                            <h2 className="navbar-logo">💰 Budget Manager</h2>
                             <button
                                 className="hamburger-btn"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -35,6 +34,9 @@ export default function Navbar() {
                                     {mobileMenuOpen ? '✕' : '☰'}
                                 </span>
                             </button>
+                            <Link to="/" className="navbar-logo-link">
+                                <h2 className="navbar-logo">💰 Budget Manager</h2>
+                            </Link>
                         </div>
 
                         {/* Desktop Navigation */}

@@ -117,7 +117,11 @@ router.post('/login',
                     username: user.username,
                     email: user.email,
                     fullName: user.full_name,
-                    createdAt: user.created_at
+                    phone: user.phone,
+                    bio: user.bio,
+                    avatar: user.avatar,
+                    createdAt: user.created_at,
+                    updatedAt: user.updated_at
                 }
             });
         } catch (error) {
