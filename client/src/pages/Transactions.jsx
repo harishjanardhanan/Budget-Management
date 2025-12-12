@@ -98,7 +98,7 @@ export default function Transactions() {
                                 </div>
                                 <div className="flex items-center gap-md">
                                     <div style={{ fontSize: '1.25rem', fontWeight: '700', color: t.type === 'income' ? 'var(--success)' : 'var(--danger)' }}>
-                                        {t.type === 'income' ? '+' : '-'}${t.amount}
+                                        {t.type === 'income' ? '+' : '-'}₹{t.amount}
                                     </div>
                                     <button onClick={() => handleDelete(t.id)} className="btn btn-ghost" style={{ padding: '0.5rem' }}>🗑️</button>
                                 </div>

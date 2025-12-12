@@ -48,7 +48,7 @@ export default function Dashboard() {
                         Total Balance
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        ${balance.toFixed(2)}
+                        ₹{balance.toFixed(2)}
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@ export default function Dashboard() {
                         Total Income
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--success)' }}>
-                        ${income.toFixed(2)}
+                        ₹{income.toFixed(2)}
                     </div>
                 </div>
 
@@ -66,7 +66,7 @@ export default function Dashboard() {
                         Total Expenses
                     </div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--danger)' }}>
-                        ${expense.toFixed(2)}
+                        ₹{expense.toFixed(2)}
                     </div>
                 </div>
             </div>
@@ -104,7 +104,7 @@ export default function Dashboard() {
                                         color: transaction.type === 'income' ? 'var(--success)' : 'var(--danger)'
                                     }}
                                 >
-                                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                                    {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount}
                                 </div>
                             </div>
                         ))}

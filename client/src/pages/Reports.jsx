@@ -63,19 +63,19 @@ export default function Reports() {
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Income</div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--success)' }}>
-                        ${summary?.totalIncome.toFixed(2) || '0.00'}
+                        ₹{summary?.totalIncome.toFixed(2) || '0.00'}
                     </div>
                 </div>
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Expenses</div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--danger)' }}>
-                        ${summary?.totalExpense.toFixed(2) || '0.00'}
+                        ₹{summary?.totalExpense.toFixed(2) || '0.00'}
                     </div>
                 </div>
                 <div className="glass-card" style={{ padding: '1.5rem' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Net</div>
                     <div style={{ fontSize: '2rem', fontWeight: '700', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        ${summary?.balance.toFixed(2) || '0.00'}
+                        ₹{summary?.balance.toFixed(2) || '0.00'}
                     </div>
                 </div>
             </div>
@@ -92,7 +92,7 @@ export default function Reports() {
                                         <span style={{ fontWeight: '600' }}>{cat.name}</span>
                                     </div>
                                     <div style={{ fontWeight: '700', color: cat.type === 'income' ? 'var(--success)' : 'var(--danger)' }}>
-                                        ${parseFloat(cat.total).toFixed(2)}
+                                        ₹{parseFloat(cat.total).toFixed(2)}
                                     </div>
                                 </div>
                                 <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>

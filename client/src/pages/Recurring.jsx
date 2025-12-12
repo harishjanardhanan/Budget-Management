@@ -153,7 +153,7 @@ export default function Recurring() {
                                         fontWeight: 'bold',
                                         color: item.type === 'income' ? 'var(--success)' : 'var(--danger)'
                                     }}>
-                                        {item.type === 'income' ? '+' : '-'}${parseFloat(item.amount).toFixed(2)}
+                                        {item.type === 'income' ? '+' : '-'}₹{parseFloat(item.amount).toFixed(2)}
                                     </div>
                                     <span className={`badge ${item.type === 'income' ? 'badge-success' : 'badge-danger'}`}>
                                         {item.type}

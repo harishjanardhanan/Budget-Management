@@ -72,8 +72,8 @@ export default function Budgets() {
                         </div>
                         <div className="mb-md">
                             <div className="flex justify-between mb-sm" style={{ fontSize: '0.875rem' }}>
-                                <span>${budget.spent.toFixed(2)} spent</span>
-                                <span>${budget.amount} budget</span>
+                                <span>₹{budget.spent.toFixed(2)} spent</span>
+                                <span>₹{budget.amount} budget</span>
                             </div>
                             <div className="progress-bar">
                                 <div className="progress-fill" style={{ width: `${Math.min(budget.percentage, 100)}%` }}></div>
@@ -84,7 +84,7 @@ export default function Budgets() {
                                 {budget.percentage.toFixed(0)}%
                             </span>
                             <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                ${budget.remaining.toFixed(2)} remaining
+                                ₹{budget.remaining.toFixed(2)} remaining
                             </span>
                         </div>
                     </div>
