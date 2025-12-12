@@ -10,6 +10,8 @@ import Recurring from './pages/Recurring';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import Groups from './pages/Groups';
+import GroupDetail from './pages/GroupDetail';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './index.css';
@@ -81,6 +83,22 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <Reports />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/groups"
+                    element={
+                        <ProtectedRoute>
+                            <Groups />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/groups/:id"
+                    element={
+                        <ProtectedRoute>
+                            <GroupDetail />
                         </ProtectedRoute>
                     }
                 />

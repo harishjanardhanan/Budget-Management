@@ -8,6 +8,10 @@ import categoryRoutes from './routes/categories.js';
 import budgetRoutes from './routes/budgets.js';
 import recurringRoutes from './routes/recurring.js';
 import reportRoutes from './routes/reports.js';
+import groupsRoutes from './routes/groups.js';
+import groupMembersRoutes from './routes/groupMembers.js';
+import groupExpensesRoutes from './routes/groupExpenses.js';
+import groupDebtsRoutes from './routes/groupDebts.js';
 
 dotenv.config();
 
@@ -40,6 +44,10 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/groups', groupsRoutes);
+app.use('/api/groups/:groupId/members', groupMembersRoutes);
+app.use('/api/groups/:groupId/expenses', groupExpensesRoutes);
+app.use('/api/groups/:groupId/debts', groupDebtsRoutes);
 
 // Serve static files in production (Docker deployment)
 if (process.env.NODE_ENV === 'production') {

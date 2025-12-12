@@ -12,6 +12,7 @@ export default function Navbar() {
         { path: '/', label: '📊 Dashboard' },
         { path: '/transactions', label: '💸 Transactions' },
         { path: '/budgets', label: '🎯 Budgets' },
+        { path: '/groups', label: '👥 Groups' },
         { path: '/recurring', label: '🔄 Recurring' },
         { path: '/reports', label: '📈 Reports' },
     ];
