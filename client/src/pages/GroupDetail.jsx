@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 
 export default function GroupDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [group, setGroup] = useState(null);
     const [members, setMembers] = useState([]);
@@ -21,9 +22,13 @@ export default function GroupDetail() {
     });
     const [newMemberUsername, setNewMemberUsername] = useState('');
 
+
+
     useEffect(() => {
         fetchGroupData();
     }, [id]);
+
+
 
     const fetchGroupData = async () => {
         try {
@@ -45,8 +50,50 @@ export default function GroupDetail() {
         }
     };
 
+    const fetchInitialMessages = async () => {
+        try {
+            const response = await api.get(`/groups/${id}/messages`);
+            setMessages(response.messages || []);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (!newMessage.trim()) return;
+
+        sendMessage(newMessage, replyingTo?.id);
+        setNewMessage('');
+        setReplyingTo(null);
+        sendTyping(false);
+    };
+
+    const handleEditMessage = () => {
+        if (!editingMessage || !newMessage.trim()) return;
+        editSocketMessage(editingMessage.id, newMessage);
+        setEditingMessage(null);
+        setNewMessage('');
+    };
+
+    const handleTyping = (e) => {
+        setNewMessage(e.target.value);
+
+        // Send typing indicator
+        sendTyping(true);
+
+        // Clear previous timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Stop typing after 2 seconds of inactivity
+        typingTimeoutRef.current = setTimeout(() => {
+            sendTyping(false);
+        }, 2000);
+    };
+
     const handleAddExpense = () => {
-        // Initialize equal split
         const equalAmount = expenseForm.amount ? (parseFloat(expenseForm.amount) / members.length).toFixed(2) : '0';
         const splits = members.map(m => ({
             userId: m.user_id,
@@ -118,6 +165,17 @@ export default function GroupDetail() {
         setExpenseForm({ ...expenseForm, splits });
     };
 
+    const handleExport = async () => {
+        try {
+            window.open(`${api.baseURL}/groups/${id}/export`, '_blank');
+        } catch (error) {
+            console.error('Error exporting:', error);
+            alert('Failed to export expenses');
+        }
+    };
+
+
+
     if (loading) return <div className="page"><div className="container">Loading...</div></div>;
     if (!group) return <div className="page"><div className="container">Group not found</div></div>;
 
@@ -127,7 +185,16 @@ export default function GroupDetail() {
     return (
         <div className="page">
             <div className="container">
-                <h1 className="animate-fade-in">{group.name}</h1>
+                <div className="flex justify-between items-center mb-lg">
+                    <h1 className="animate-fade-in">{group.name}</h1>
+                    <button
+                        onClick={() => navigate(`/groups/${id}/chat`)}
+                        className="btn btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        💬 Open Chat
+                    </button>
+                </div>
                 {group.description && (
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
                         {group.description}
@@ -160,28 +227,33 @@ export default function GroupDetail() {
                         className={`tab ${activeTab === 'expenses' ? 'active' : ''}`}
                         onClick={() => setActiveTab('expenses')}
                     >
-                        Expenses
+                        💸 Expenses
                     </button>
                     <button
                         className={`tab ${activeTab === 'debts' ? 'active' : ''}`}
                         onClick={() => setActiveTab('debts')}
                     >
-                        Debts
+                        💰 Debts
                     </button>
                     <button
                         className={`tab ${activeTab === 'members' ? 'active' : ''}`}
                         onClick={() => setActiveTab('members')}
                     >
-                        Members
+                        👥 Members
                     </button>
                 </div>
 
                 {/* Expenses Tab */}
                 {activeTab === 'expenses' && (
                     <div>
-                        <button onClick={handleAddExpense} className="btn btn-primary mb-lg">
-                            + Add Expense
-                        </button>
+                        <div className="flex gap-md mb-lg">
+                            <button onClick={handleAddExpense} className="btn btn-primary">
+                                + Add Expense
+                            </button>
+                            <button onClick={handleExport} className="btn btn-ghost">
+                                📥 Export CSV
+                            </button>
+                        </div>
 
                         {expenses.length === 0 ? (
                             <div className="glass-card" style={{ padding: 'var(--spacing-xl)', textAlign: 'center' }}>
@@ -245,6 +317,7 @@ export default function GroupDetail() {
                     </div>
                 )}
 
+
                 {/* Members Tab */}
                 {activeTab === 'members' && (
                     <div>
@@ -259,7 +332,7 @@ export default function GroupDetail() {
                                 <div key={member.user_id} className="glass-card" style={{ padding: 'var(--spacing-lg)' }}>
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-md">
-                                            <div className="user-avatar">
+                                            <div className="user-avatar" style={{ position: 'relative' }}>
                                                 {member.avatar ? (
                                                     <img src={member.avatar} alt={member.username} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                                                 ) : (
@@ -294,6 +367,7 @@ export default function GroupDetail() {
                     </div>
                 )}
 
+                {/* Modals remain the same... */}
                 {/* Add Expense Modal */}
                 {showExpenseModal && (
                     <div className="modal-overlay" onClick={() => setShowExpenseModal(false)}>

@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Groups from './pages/Groups';
 import GroupDetail from './pages/GroupDetail';
+import GroupChat from './pages/GroupChat';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './index.css';
@@ -99,6 +100,14 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <GroupDetail />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/groups/:id/chat"
+                    element={
+                        <ProtectedRoute>
+                            <GroupChat />
                         </ProtectedRoute>
                     }
                 />

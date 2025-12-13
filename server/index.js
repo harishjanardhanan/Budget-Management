@@ -12,6 +12,10 @@ import groupsRoutes from './routes/groups.js';
 import groupMembersRoutes from './routes/groupMembers.js';
 import groupExpensesRoutes from './routes/groupExpenses.js';
 import groupDebtsRoutes from './routes/groupDebts.js';
+import groupMessagesRoutes from './routes/groupMessages.js';
+import groupExportRoutes from './routes/groupExport.js';
+import { initializeWebSocket } from './websocket.js';
+import { createServer } from 'http';
 
 dotenv.config();
 
@@ -48,6 +52,8 @@ app.use('/api/groups', groupsRoutes);
 app.use('/api/groups/:groupId/members', groupMembersRoutes);
 app.use('/api/groups/:groupId/expenses', groupExpensesRoutes);
 app.use('/api/groups/:groupId/debts', groupDebtsRoutes);
+app.use('/api/groups/:groupId/messages', groupMessagesRoutes);
+app.use('/api/groups/:groupId', groupExportRoutes);
 
 // Serve static files in production (Docker deployment)
 if (process.env.NODE_ENV === 'production') {
@@ -79,10 +85,17 @@ async function startServer() {
         console.log('🔄 Initializing database...');
         await initializeDatabase();
 
-        app.listen(PORT, () => {
+        const httpServer = createServer(app);
+
+        // Initialize WebSocket
+        initializeWebSocket(httpServer);
+        console.log('✅ WebSocket initialized');
+
+        httpServer.listen(PORT, () => {
             console.log(`\n🚀 Server running on http://localhost:${PORT}`);
             console.log(`📊 API endpoints available at http://localhost:${PORT}/api`);
-            console.log(`💚 Health check: http://localhost:${PORT}/health\n`);
+            console.log(`💚 Health check: http://localhost:${PORT}/health`);
+            console.log(`🔌 WebSocket server running\n`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error);
