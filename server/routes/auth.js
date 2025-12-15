@@ -60,6 +60,9 @@ router.post('/register',
                     username: user.username,
                     email: user.email,
                     fullName: user.full_name,
+                    teamId: user.team_id,
+                    teamRole: user.team_role,
+                    joinedTeamAt: user.joined_team_at,
                     createdAt: user.created_at
                 }
             });

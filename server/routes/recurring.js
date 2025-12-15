@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
             `SELECT r.*, c.name as category_name, c.color as category_color, c.icon as category_icon
        FROM recurring_transactions r
        LEFT JOIN categories c ON r.category_id = c.id
-       WHERE r.user_id = $1 OR r.is_private = false
+       JOIN users u ON u.id = $1
+       WHERE r.team_id = u.team_id
        ORDER BY r.next_occurrence ASC`,
             [userId]
         );
@@ -55,12 +56,16 @@ router.post('/',
             const start = new Date(startDate);
             let nextOccurrence = new Date(start);
 
+            // Get user's team_id
+            const userTeam = await pool.query('SELECT team_id FROM users WHERE id = $1', [userId]);
+            const teamId = userTeam.rows[0]?.team_id;
+
             const result = await pool.query(
                 `INSERT INTO recurring_transactions 
-         (user_id, type, amount, category_id, description, frequency, start_date, next_occurrence, is_private)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         (user_id, type, amount, category_id, description, frequency, start_date, next_occurrence, is_private, team_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          RETURNING *`,
-                [userId, type, amount, categoryId || null, description || null, frequency, startDate, nextOccurrence, isPrivate || false]
+                [userId, type, amount, categoryId || null, description || null, frequency, startDate, nextOccurrence, isPrivate || false, teamId]
             );
 
             res.status(201).json({

@@ -15,7 +15,10 @@ router.get('/', async (req, res) => {
             `SELECT b.*, c.name as category_name, c.color as category_color, c.icon as category_icon
        FROM budgets b
        LEFT JOIN categories c ON b.category_id = c.id
-       ORDER BY c.name ASC`
+       JOIN users u ON u.id = $1
+       WHERE b.team_id = u.team_id
+       ORDER BY c.name ASC`,
+            [req.user.userId]
         );
 
         // Get current spending for each budget
@@ -37,9 +40,10 @@ router.get('/', async (req, res) => {
 
                 const spendingResult = await pool.query(
                     `SELECT COALESCE(SUM(amount), 0) as spent
-           FROM transactions
-           WHERE category_id = $1 AND type = 'expense' ${dateFilter}`,
-                    [budget.category_id]
+           FROM transactions t
+           JOIN users u ON u.id = $2
+           WHERE t.category_id = $1 AND t.type = 'expense' AND t.team_id = u.team_id ${dateFilter}`,
+                    [budget.category_id, req.user.userId]
                 );
 
                 const spent = parseFloat(spendingResult.rows[0].spent);
@@ -99,12 +103,16 @@ router.post('/',
                     [amount, categoryId, period]
                 );
             } else {
+                // Get user's team_id
+                const userTeam = await pool.query('SELECT team_id FROM users WHERE id = $1', [userId]);
+                const teamId = userTeam.rows[0]?.team_id;
+
                 // Create new budget
                 result = await pool.query(
-                    `INSERT INTO budgets (category_id, amount, period, created_by)
-           VALUES ($1, $2, $3, $4)
+                    `INSERT INTO budgets (category_id, amount, period, created_by, team_id)
+           VALUES ($1, $2, $3, $4, $5)
            RETURNING *`,
-                    [categoryId, amount, period, userId]
+                    [categoryId, amount, period, userId, teamId]
                 );
             }
 
@@ -124,7 +132,13 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await pool.query('DELETE FROM budgets WHERE id = $1 RETURNING *', [id]);
+        const result = await pool.query(
+            `DELETE FROM budgets b
+             USING users u
+             WHERE b.id = $1 AND u.id = $2 AND b.team_id = u.team_id
+             RETURNING b.*`,
+            [id, req.user.userId]
+        );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Budget not found' });

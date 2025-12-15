@@ -26,11 +26,15 @@ router.post('/',
     const userId = req.user.userId;
 
     try {
+      // Get user's team_id
+      const userTeam = await pool.query('SELECT team_id FROM users WHERE id = $1', [userId]);
+      const teamId = userTeam.rows[0]?.team_id;
+
       const result = await pool.query(
-        `INSERT INTO transactions (user_id, type, amount, category_id, description, transaction_date, is_private)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO transactions (user_id, type, amount, category_id, description, transaction_date, is_private, team_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id, user_id, type, amount, category_id, description, transaction_date, is_private, created_at`,
-        [userId, type, amount, categoryId || null, description || null, transactionDate || new Date(), isPrivate || false]
+        [userId, type, amount, categoryId || null, description || null, transactionDate || new Date(), isPrivate || false, teamId]
       );
 
       res.status(201).json({
@@ -67,7 +71,8 @@ router.get('/',
         FROM transactions t
         LEFT JOIN categories c ON t.category_id = c.id
         LEFT JOIN users u ON t.user_id = u.id
-        WHERE (t.is_private = false OR t.user_id = $1)
+        JOIN users auth_user ON auth_user.id = $1
+        WHERE t.team_id = auth_user.team_id
       `;
       const params = [userId];
       let paramIndex = 2;
@@ -80,7 +85,8 @@ router.get('/',
           FROM transactions t
           LEFT JOIN categories c ON t.category_id = c.id
           LEFT JOIN users u ON t.user_id = u.id
-          WHERE t.user_id = $1
+          JOIN users auth_user ON auth_user.id = $1
+          WHERE t.user_id = $1 AND t.team_id = auth_user.team_id
         `;
       }
 
@@ -153,8 +159,9 @@ router.get('/stats',
         `SELECT 
            SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as total_income,
            SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as total_expense
-         FROM transactions
-         WHERE (is_private = false OR user_id = $1) ${dateFilter}`,
+         FROM transactions t
+         JOIN users u ON u.id = $1
+         WHERE t.team_id = u.team_id ${dateFilter}`,
         params
       );
 
@@ -165,7 +172,8 @@ router.get('/stats',
                 COUNT(t.id) as count
          FROM transactions t
          LEFT JOIN categories c ON t.category_id = c.id
-         WHERE (t.is_private = false OR t.user_id = $1) ${dateFilter}
+         JOIN users u ON u.id = $1
+         WHERE t.team_id = u.team_id ${dateFilter}
          GROUP BY c.id, c.name, c.color, c.icon, t.type
          ORDER BY total DESC`,
         params

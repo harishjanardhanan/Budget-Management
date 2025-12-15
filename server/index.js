@@ -14,6 +14,7 @@ import groupExpensesRoutes from './routes/groupExpenses.js';
 import groupDebtsRoutes from './routes/groupDebts.js';
 import groupMessagesRoutes from './routes/groupMessages.js';
 import groupExportRoutes from './routes/groupExport.js';
+import teamsRoutes from './routes/teams.js';
 import { initializeWebSocket } from './websocket.js';
 import { createServer } from 'http';
 
@@ -48,6 +49,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/teams', teamsRoutes);
 app.use('/api/groups', groupsRoutes);
 app.use('/api/groups/:groupId/members', groupMembersRoutes);
 app.use('/api/groups/:groupId/expenses', groupExpensesRoutes);

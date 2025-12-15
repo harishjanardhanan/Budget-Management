@@ -8,12 +8,29 @@ const router = express.Router();
 // Get all categories (public endpoint, no auth required)
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query(
-            `SELECT c.*, u.username as created_by_username
-       FROM categories c
-       LEFT JOIN users u ON c.created_by = u.id
-       ORDER BY c.is_default DESC, c.name ASC`
-        );
+        const userId = req.user?.userId; // Optional auth
+        let query, params;
+
+        if (userId) {
+            // Show default categories + user's team categories
+            query = `SELECT c.*, u.username as created_by_username
+               FROM categories c
+               LEFT JOIN users u ON c.created_by = u.id
+               LEFT JOIN users current_user ON current_user.id = $1
+               WHERE c.is_default = true OR c.team_id = current_user.team_id
+               ORDER BY c.is_default DESC, c.name ASC`;
+            params = [userId];
+        } else {
+            // Show only default categories if not authenticated
+            query = `SELECT c.*, u.username as created_by_username
+               FROM categories c
+               LEFT JOIN users u ON c.created_by = u.id
+               WHERE c.is_default = true
+               ORDER BY c.name ASC`;
+            params = [];
+        }
+
+        const result = await pool.query(query, params);
 
         res.json({
             categories: result.rows,
@@ -51,11 +68,15 @@ router.post('/',
                 return res.status(409).json({ error: 'Category already exists' });
             }
 
+            // Get user's team_id
+            const userTeam = await pool.query('SELECT team_id FROM users WHERE id = $1', [userId]);
+            const teamId = userTeam.rows[0]?.team_id;
+
             const result = await pool.query(
-                `INSERT INTO categories (name, color, icon, created_by, is_default)
-         VALUES ($1, $2, $3, $4, false)
+                `INSERT INTO categories (name, color, icon, created_by, is_default, team_id)
+         VALUES ($1, $2, $3, $4, false, $5)
          RETURNING *`,
-                [name, color || '#6366f1', icon || '📌', userId]
+                [name, color || '#6366f1', icon || '📌', userId, teamId]
             );
 
             res.status(201).json({
